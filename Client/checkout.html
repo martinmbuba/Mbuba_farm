@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout - Kaggia Farm</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="./index.js"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+  <!-- Header -->
+  <header class="bg-green-700 text-white p-4">
+    <div class="container mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold">AgriMarket</h1>
+      <nav>
+        <a href="index.html" class="mr-4 hover:underline">Home</a>
+        <a href="products.html" class="mr-4 hover:underline">Products</a>
+        <a href="cart.html" class="hover:underline">Cart</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Checkout Form -->
+  <section class="py-12 px-4">
+    <div class="container mx-auto max-w-xl bg-white p-6 rounded shadow">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">Checkout</h2>
+      <form id="checkout-form">
+        <div class="mb-4">
+          <label for="name" class="block text-gray-700 mb-2">Full Name</label>
+          <input type="text" id="name" name="name" class="w-full border px-3 py-2 rounded" required>
+        </div>
+        <div class="mb-4">
+          <label for="email" class="block text-gray-700 mb-2">Email</label>
+          <input type="email" id="email" name="email" class="w-full border px-3 py-2 rounded" required>
+        </div>
+        <div class="mb-4">
+          <label for="address" class="block text-gray-700 mb-2">Delivery Address</label>
+          <textarea id="address" name="address" rows="3" class="w-full border px-3 py-2 rounded" required></textarea>
+        </div>
+        <div class="mb-6">
+          <p class="text-lg font-semibold">Total: $<span id="checkout-total">0.00</span></p>
+        </div>
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Place Order</button>
+      </form>
+      <div id="confirmation" class="mt-6 text-green-700 font-semibold hidden">
+        Thank you! Your order has been placed.
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-green-700 text-white text-center py-4">
+    <p>&copy; 2025 AgriMarket. All rights reserved.</p>
+    <p>Follow us on:
+      <a href="#" class="text-white hover:underline">Facebook</a>,
+      <a href="#" class="text-white hover:underline">Twitter</a>,
+      <a href="#" class="text-white hover:underline">Instagram</a>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    const total = JSON.parse(localStorage.getItem('cart'))?.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0;
+    document.getElementById('checkout-total').textContent = total.toFixed(2);
+
+    document.getElementById('checkout-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      // Here you would send data to backend in real application
+      localStorage.removeItem('cart');
+      document.getElementById('checkout-form').classList.add('hidden');
+      document.getElementById('confirmation').classList.remove('hidden');
+    });
+    // Fetch products from the server
+fetch('http://localhost:3000/api/products')
+  .then(response => response.json())
+  .then(products => {
+    // Render products dynamically
+    const productList = document.getElementById('product-list');
+    products.forEach(product => {
+      const div = document.createElement('div');
+      div.className = 'bg-gray-100 p-4 rounded shadow';
+      div.innerHTML = `
+        <img src="${product.image}" alt="${product.name}" class="w-full h-40 object-cover mb-4 rounded">
+        <h4 class="text-lg font-semibold text-gray-800">${product.name}</h4>
+        <p class="text-green-700 font-bold">$${product.price.toFixed(2)}</p>
+        <button class="mt-2 bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 add-to-cart" data-id="${product.id}">Add to Cart</button>
+      `;
+      productList.appendChild(div);
+    });
+
+    // Event listener for adding products to the cart
+    document.addEventListener('click', function (e) {
+      if (e.target.classList.contains('add-to-cart')) {
+        const productId = parseInt(e.target.getAttribute('data-id'));
+        addToCart(productId);
+      }
+    });
+  });
+// Add item to the cart by sending a POST request to the server
+function addToCart(productId) {
+  fetch('http://localhost:3000/api/cart', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ id: productId, quantity: 1 }),
+  })
+    .then(response => response.json())
+    .then(cart => {
+      localStorage.setItem('cart', JSON.stringify(cart)); // Update cart in local storage
+      updateCartCount(); // Update the cart count in the header
+    });
+}
+// 1. Define your exchange rate (or fetch it dynamically)
+const EXCHANGE_RATE_USD_TO_KES = 129.27; // 1 USD ≈ 129.27 KES
+
+// 2. Utility to convert & format
+function toKES(amountUSD) {
+  const amountKES = amountUSD * EXCHANGE_RATE_USD_TO_KES;
+  // Use Intl.NumberFormat for proper currency formatting :contentReference[oaicite:0]{index=0}
+  return new Intl.NumberFormat('en-KE', {
+    style: 'currency',
+    currency: 'KES',
+  }).format(amountKES);
+}
+
+// 3. Wherever you render a price:
+const priceInUSD = 2.5;
+const display = toKES(priceInUSD); // “KSh 322.00” (for example)
+
+  </script>
+</body>
+</html>

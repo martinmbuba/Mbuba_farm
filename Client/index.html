@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kaggia Farm - Fresh Farm Produce</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="./index.js"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+  <!-- Header -->
+  <header class="bg-green-700 text-white p-4">
+    <div class="container mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold">Kaggia Farm</h1>
+      <nav>
+        <a href="index.html" class="mr-4 hover:underline">Home</a>
+        <a href="products.html" class="mr-4 hover:underline">Products</a>
+        <a href="cart.html" class="hover:underline">
+            cart (<span id="cart-count">0</span>)
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="text-center py-16 px-4 bg-cover bg-center" style="background-image: url('https://img.freepik.com/free-photo/close-up-delicious-organic-tomatoes_23-2149125238.jpg?ga=GA1.1.785613439.1747211217&semt=ais_hybrid&w=740');">
+  <h2 class="text-3xl font-bold text-white mb-4">Fresh Produce, Straight from the Farm</h2>
+  <p class="text-white mb-6">Support local farmers and get the best quality at affordable prices.</p>
+  <a href="products.html" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition">Shop Now</a>
+</section>
+
+  <!-- Featured Products -->
+  <section class="py-12 bg-white">
+    <div class="container mx-auto px-4">
+      <h3 class="text-xl font-semibold text-gray-800 mb-6">Featured Products</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6" id="product-list">
+        <!-- Products will be inserted here by JavaScript -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-green-700 text-white text-center py-4">
+    <p>&copy; 2025 Kaggia Farm. All rights reserved.</p>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+  const products = [
+    { id: 1, name: 'Avocados', price: 2.5, image: 'https://img.freepik.com/free-psd/fresh-avocado-with-water-splash-leaves-transparent-background_84443-26275.jpg?ga=GA1.1.785613439.1747211217&semt=ais_hybrid&w=740' },
+    { id: 2, name: 'Tomatoes', price: 1.2, image: 'https://img.freepik.com/free-photo/fresh-red-tomatoes_2829-13449.jpg?ga=GA1.1.785613439.1747211217&semt=ais_hybrid&w=740' },
+    { id: 3, name: 'Beans', price: 3.0, image: 'https://img.freepik.com/free-photo/various-legumes_53876-47070.jpg?ga=GA1.1.785613439.1747211217&semt=ais_hybrid&w=740' },
+    { id: 3, name: 'maize', price: 3.0, image: 'https://img.freepik.com/free-vector/corn-cobs-realistic_1284-14091.jpg?ga=GA1.1.785613439.1747211217&semt=ais_hybrid&w=740' },
+    { id: 3, name: 'Greens', price: 3.0, image: 'https://img.freepik.com/free-photo/top-view-greens-leaf-vegetables-horizontal_176474-5144.jpg?ga=GA1.1.785613439.1747211217&semt=ais_hybrid&w=740' },
+    { id: 3, name: 'Bananas', price: 3.0, image: 'https://img.freepik.com/free-photo/yellow-banana-fruit_74190-4830.jpg?ga=GA1.1.785613439.1747211217&semt=ais_hybrid&w=740' },
+    { id: 3, name: 'Honey', price: 3.0, image: 'https://img.freepik.com/premium-photo/honey-dipper-pouring-honey-isolated-white_88281-16.jpg?ga=GA1.1.785613439.1747211217&semt=ais_hybrid&w=740' },
+    { id: 3, name: 'Potatoes', price: 3.0, image: 'https://img.freepik.com/free-photo/side-view-raw-potatoes-dish_141793-7235.jpg?ga=GA1.1.785613439.1747211217&semt=ais_hybrid&w=740' },
+    { id: 3, name: 'Cassava', price: 3.0, image: 'https://img.freepik.com/premium-photo/fresh-cassava-root-isolated_259266-202.jpg?ga=GA1.1.785613439.1747211217&semt=ais_hybrid&w=740' },
+  ];
+
+
+   const productList = document.getElementById('product-list');
+  const cartCount = document.getElementById('cart-count');
+
+  // Function to update the cart count
+  function updateCartCount() {
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
+    cartCount.textContent = itemCount;
+  }
+
+  // Function to add item to cart
+  function addToCart(productId) {
+    const product = products.find(p => p.id === productId);
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    const existing = cart.find(item => item.id === product.id);
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      cart.push({ ...product, quantity: 1 });
+    }
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartCount(); // Update the cart count when an item is added
+  }
+
+  // Create product cards and append them to the page
+  products.forEach(product => {
+    const div = document.createElement('div');
+    div.className = 'bg-gray-100 p-4 rounded shadow';
+    div.innerHTML = `
+      <img src="${product.image}" alt="${product.name}" class="w-full h-40 object-cover mb-4 rounded">
+      <h4 class="text-lg font-semibold text-gray-800">${product.name}</h4>
+      <p class="text-green-700 font-bold">$${product.price.toFixed(2)}</p>
+      <button class="mt-2 bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 add-to-cart" data-id="${product.id}">Add to Cart</button>
+    `;
+    productList.appendChild(div);
+  });
+
+  // Event listener for adding products to the cart
+  document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('add-to-cart')) {
+      const productId = parseInt(e.target.getAttribute('data-id'));
+      addToCart(productId);
+    }
+  });
+
+  // Initially update the cart count when the page loads
+  updateCartCount();
+  // Fetch products from the server
+fetch('http://localhost:3000/api/products')
+  .then(response => response.json())
+  .then(products => {
+    // Render products dynamically
+    const productList = document.getElementById('product-list');
+    products.forEach(product => {
+      const div = document.createElement('div');
+      div.className = 'bg-gray-100 p-4 rounded shadow';
+      div.innerHTML = `
+        <img src="${product.image}" alt="${product.name}" class="w-full h-40 object-cover mb-4 rounded">
+        <h4 class="text-lg font-semibold text-gray-800">${product.name}</h4>
+        <p class="text-green-700 font-bold">$${product.price.toFixed(2)}</p>
+        <button class="mt-2 bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 add-to-cart" data-id="${product.id}">Add to Cart</button>
+      `;
+      productList.appendChild(div);
+    });
+
+    // Event listener for adding products to the cart
+    document.addEventListener('click', function (e) {
+      if (e.target.classList.contains('add-to-cart')) {
+        const productId = parseInt(e.target.getAttribute('data-id'));
+        addToCart(productId);
+      }
+    });
+  });
+// Add item to the cart by sending a POST request to the server
+function addToCart(productId) {
+  fetch('http://localhost:3000/api/cart', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ id: productId, quantity: 1 }),
+  })
+    .then(response => response.json())
+    .then(cart => {
+      localStorage.setItem('cart', JSON.stringify(cart)); // Update cart in local storage
+      updateCartCount(); // Update the cart count in the header
+    });
+}
+// 1. Define your exchange rate (or fetch it dynamically)
+const EXCHANGE_RATE_USD_TO_KES = 129.27; // 1 USD ≈ 129.27 KES
+
+// 2. Utility to convert & format
+function toKES(amountUSD) {
+  const amountKES = amountUSD * EXCHANGE_RATE_USD_TO_KES;
+  // Use Intl.NumberFormat for proper currency formatting :contentReference[oaicite:0]{index=0}
+  return new Intl.NumberFormat('en-KE', {
+    style: 'currency',
+    currency: 'KES',
+  }).format(amountKES);
+}
+
+// 3. Wherever you render a price:
+const priceInUSD = 2.5;
+const display = toKES(priceInUSD); // “KSh 322.00” (for example)
+
+    </script>
+
+</body>
+</html>
